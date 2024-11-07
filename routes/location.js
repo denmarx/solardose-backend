@@ -27,11 +27,21 @@ router.post('/update-location', async (req, res) => {
             user.longitude = longitude;
         }
 
-        // Calculate the next notification time based on sun position
-        const times = SunCalc.getTimes(new Date(), latitude, longitude);
-        user.nextNotificationTime = times.sunset; // Example: sunset time
+       // Calculate the current sun position
+        const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
+        const sunAltitude = sunPosition.altitude; // Sun's altitude in radians
 
+        // Check if the sun's altitude is greater than 45 degrees (convert 45 degrees to radians)
+        const sunAltitudeInDegrees = sunAltitude * (180 / Math.PI); // Convert altitude to degrees
+        if (sunAltitudeInDegrees > 45) {
+            // Send the push notification if the altitude is greater than 45 degrees
+            await sendPushNotification(user.expoPushToken, "The sun is high in the sky! Enjoy the day!");
+        }
+
+        // Save user information with updated location
+        user.nextNotificationTime = new Date(); // For simplicity, using current time; you can adjust as needed.
         await user.save();
+
         res.send({ message: 'Location updated and notification scheduled.' });
     } catch (error) {
         res.status(500).send({ error: 'An error occurred while updating location' });
