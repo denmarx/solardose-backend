@@ -11,6 +11,8 @@
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
+    "expo-server-sdk": "^3.11.0",
     "express": "^4.21.1",
     "mongoose": "^8.8.0",
     "node-cron": "^3.0.3",
