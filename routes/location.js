@@ -19,12 +19,16 @@ router.post('/update-location', async (req, res) => {
         
         if (!user) {
             // If user does not exist, create a new one 
-            user = new User({ expoPushToken: token, latitude, longitude });
+            user = new User({
+                expoPushToken: token, 
+                location: {latitude, longitude}
+            });
         } else {
             // Update existing user's location and token
             user.expoPushToken = token;
-            user.latitude = latitude;
-            user.longitude = longitude;
+            user.location = {
+                latitude, longitude
+            };
         }
 
        // Calculate the current sun position
