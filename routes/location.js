@@ -15,7 +15,7 @@ router.post('/update-location', async (req, res) => {
         return res.status(400).send({ error: 'Token and location are required' });
     }
 
-    const { latitude, longitude } = location.coords;
+    const { latitude, longitude } = location;
 
     try {
         let user = await User.findOne({ expoPushToken: token });
