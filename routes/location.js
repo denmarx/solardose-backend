@@ -8,6 +8,9 @@ const sendPushNotification = require('../utils/sendPushNotification');
 router.post('/update-location', async (req, res) => {
     const { token, location } = req.body;
 
+     console.log('Received token:', token);
+    console.log('Received location:', location);  // Log the location to check its structure
+
     if (!token || !location) {
         return res.status(400).send({ error: 'Token and location are required' });
     }
