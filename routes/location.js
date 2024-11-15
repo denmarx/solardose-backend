@@ -99,7 +99,7 @@ router.post('/send-weekly-reminder', async (req, res) => {
         const remindersSent = [];
 
         for (const user of users) {
-            const lastReminderDate = user.lastReminderDate ? newDate(user.lastReminderDate) : null;
+            const lastReminderDate = user.lastReminderDate ? new Date(user.lastReminderDate) : null;
 
             // Check if it's been a week since the last reminder
             if (!lastReminderDate || (today - lastReminderDate) >= 7 * 24 * 60 * 60 * 1000) {
