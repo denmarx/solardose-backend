@@ -90,6 +90,42 @@ router.post('/check-sun-position', async (req, res) => {
     }
 });
 
+// Endpoint to send weekly reminders
+router.post('/send-weekly-reminder', async (req, res) => {
+    try {
+        const users = await User.find({});
+        const today = new Date();
+
+        const remindersSent = [];
+
+        for (const user of users) {
+            const lastReminderDate = user.lastReminderDate ? newDate(user.lastReminderDate) : null;
+
+            // Check if it's been a week since the last reminder
+            if (!lastReminderDate || (today - lastReminderDate) >= 7 * 24 * 60 * 60 * 1000) {
+                const message = "Don't forget to open the app to update your location for accurate sun advice!"
+                await sendPushNotification(user.expoPushToken, message);
+
+                // Update the last reminder date
+                user.lastReminderDate = today;
+                await user.save();
+
+                remindersSent.push({
+                    user: user.expoPushToken,
+                    message,
+                });
+            }
+        }
+        res.status(200).send({
+            message: 'Weekly reminders sent successfully.',
+            remindersSent
+        });
+    } catch (error) {
+        console.error("Error in /send-weekly-reminder:", error);
+        res.status(500).send({ error: 'An error occured while sending weekly reminders' });
+    }
+});
+
 
 // Endpoint to send a notification to the user
 router.post('/send-notification', async (req, res) => {
