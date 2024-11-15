@@ -27,36 +27,4 @@ const sendPushNotification = async (expoPushToken, message) => {
     }
 };
 
-// const fetch = require('node-fetch');
-
-// async function sendPushNotification(token, message) {
-//     const payload = {
-//         to: token,
-//         sound: 'default',
-//         title: 'Test Notification',
-//         body: message,
-//         data: { someData: 'goes here' },
-//     };
-
-//     try {
-//         const response = await fetch('https://exp.host/--/api/v2/push/send', {
-//             method: 'POST',
-//             headers: {
-//                 Accept: 'application/json',
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify(payload),
-//         });
-
-//         if (!response.ok) {
-//             throw new Error(`Failed to send push notification: ${response.statusText}`);
-//         }
-
-//         const responseData = await response.json();
-//         console.log("Push notification response:", responseData);
-//     } catch (error) {
-//         console.error("Error in sendPushNotification:", error);
-//     }
-// }
-
 module.exports = sendPushNotification;

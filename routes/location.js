@@ -34,27 +34,51 @@ router.post('/update-location', async (req, res) => {
             };
         }
 
-       // Calculate the current sun position
-        const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
-        const sunAltitude = sunPosition.altitude; // Sun's altitude in radians
-
-        // Check if the sun's altitude is greater than 45 degrees (convert 45 degrees to radians)
-        const sunAltitudeInDegrees = sunAltitude * (180 / Math.PI); // Convert altitude to degrees
-        console.log(sunAltitudeInDegrees);
-        if (sunAltitudeInDegrees < 45) {
-            // Send the push notification if the altitude is greater than 45 degrees
-            await sendPushNotification(user.expoPushToken, "The sun is high in the sky! Enjoy the day!" );
-        }
-
-        // Save user information with updated location
-        user.nextNotificationTime = new Date(); // For simplicity, using current time; you can adjust as needed.
+        // Save updated user information
         await user.save();
 
-        res.send({ message: 'Location updated and notification scheduled.' });
+        res.send({ message: 'Location updated successfully.' });
     } catch (error) {
         res.status(500).send({ error: 'An error occurred while updating location' });
     }
 });
+
+// Endpoint to check the sun's position for all users
+router.post('check-sun-position', async (req, res) => {
+    try {
+        // Fetch all users from database
+        const users = await User.find({});
+        const notificationsSent = [];
+
+        // Iterate over all users and calculate the sun's position
+        for (const user of users) {
+            const { latitude, longitude } = user.location;
+            const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
+            const sunAltitudeinDegrees = sunPosition.altitude * (180 / Math.PI);
+
+            console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
+            
+            if (sunAltitudeinDegrees >= 10) {
+                const message = "The sun is at a great angle! Perfect time for some Vitamin D!"
+                await sendPushNotification(user.expoPushToken, message);
+
+                notificationsSent.push({
+                    user: user.expoPushToken,
+                    message,
+                });
+            }
+        }
+
+        res.status(200).send({
+            message: 'Checked sun position for all users.',
+            notificationsSent,
+        });
+    } catch (error) {
+        console.error("Error in /check-sun-position:", error);
+        res.status(500).send({ error: 'An error occured while checking the sun position' });
+    }
+});
+
 
 // Endpoint to send a notification to the user
 router.post('/send-notification', async (req, res) => {
