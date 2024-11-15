@@ -44,7 +44,7 @@ router.post('/update-location', async (req, res) => {
 });
 
 // Endpoint to check the sun's position for all users
-router.post('check-sun-position', async (req, res) => {
+router.post('/check-sun-position', async (req, res) => {
     try {
         // Fetch all users from database
         const users = await User.find({});
