@@ -8,7 +8,7 @@ const sendPushNotification = require('../utils/sendPushNotification');
 router.post('/update-location', async (req, res) => {
     const { token, location } = req.body;
 
-     console.log('Received token:', token);
+    console.log('Received token:', token);
     console.log('Received location:', location);  // Log the location to check its structure
 
     if (!token || !location) {
@@ -42,7 +42,7 @@ router.post('/update-location', async (req, res) => {
         const sunAltitudeInDegrees = sunAltitude * (180 / Math.PI); // Convert altitude to degrees
         if (sunAltitudeInDegrees < 45) {
             // Send the push notification if the altitude is greater than 45 degrees
-            await sendPushNotification(user.expoPushToken, "The sun is high in the sky! Enjoy the day!");
+            await sendPushNotification(user.expoPushToken, "The sun is high in the sky! Enjoy the day!" );
         }
 
         // Save user information with updated location
