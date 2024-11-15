@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
         latitude: Number,
         longitude: Number,
     },
-    nextNotificationTime: Date,
+    lastNotificationDate: {type: Date},
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -58,14 +58,25 @@ router.post('/check-sun-position', async (req, res) => {
 
             console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
             
-            if (sunAltitudeinDegrees >= 10) {
-                const message = "The sun is at a great angle! Perfect time for some Vitamin D!"
-                await sendPushNotification(user.expoPushToken, message);
+            if (sunAltitudeinDegrees >= 1) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); //Start of today's date (midnight)
 
-                notificationsSent.push({
-                    user: user.expoPushToken,
-                    message,
-                });
+                // Check if a notification has been sent today
+                if (!user.lastNotificationDate || new Date(user.lastNotificationDate).getTime() < today.getTime()) {
+                    // Send notification
+                    const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
+                    await sendPushNotification(user.expoPushToken, message);
+                   
+                    // Update the last notification date
+                    user.lastNotificationDate = new Date();
+                    await user.save();
+
+                    notificationsSent.push({
+                        user: user.expoPushToken,
+                        message,
+                    });
+                }
             }
         }
 
