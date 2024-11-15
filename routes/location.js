@@ -104,18 +104,24 @@ router.post('/send-weekly-reminder', async (req, res) => {
             // Check if it's been a week since the last reminder
             if (!lastReminderDate || (today - lastReminderDate) >= 7 * 24 * 60 * 60 * 1000) {
                 const message = "Don't forget to open the app to update your location for accurate sun advice!"
-                await sendPushNotification(user.expoPushToken, message);
-
-                // Update the last reminder date
-                user.lastReminderDate = today;
-                await user.save();
-
-                remindersSent.push({
-                    user: user.expoPushToken,
-                    message,
-                });
+                
+                try {
+                    await sendPushNotification(user.expoPushToken, message);
+                    
+                    // Update the last reminder date
+                    user.lastReminderDate = today;
+                    await user.save();
+                    
+                    remindersSent.push({
+                        user: user.expoPushToken,
+                        message,
+                    });
+                } catch (notificationError) {
+                    console.error(`Failed to send notification to user ${user.expoPushToken}:`, notificationError);
+                }
             }
         }
+        
         res.status(200).send({
             message: 'Weekly reminders sent successfully.',
             remindersSent
