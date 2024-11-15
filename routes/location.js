@@ -40,6 +40,7 @@ router.post('/update-location', async (req, res) => {
 
         // Check if the sun's altitude is greater than 45 degrees (convert 45 degrees to radians)
         const sunAltitudeInDegrees = sunAltitude * (180 / Math.PI); // Convert altitude to degrees
+        console.log(sunAltitudeInDegrees);
         if (sunAltitudeInDegrees < 45) {
             // Send the push notification if the altitude is greater than 45 degrees
             await sendPushNotification(user.expoPushToken, "The sun is high in the sky! Enjoy the day!" );
