@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
     location: {
         latitude: Number,
         longitude: Number,
+        timezone: String,
     },
     lastNotificationDate: { type: Date },
     lastReminderDate: {type: Date},

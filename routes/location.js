@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require('../models/User');
 const SunCalc = require('suncalc');
 const sendPushNotification = require('../utils/sendPushNotification'); 
+const { DateTime } = require('luxon');
+const geoTz = require('geo-tz');
 
 // Endpoint to update location and push token
 router.post('/update-location', async (req, res) => {
@@ -18,27 +20,33 @@ router.post('/update-location', async (req, res) => {
     const { latitude, longitude } = location;
 
     try {
+        // Derive the timezone using geo-tz
+        const timezone = geoTz(latitude, longitude)[0];
+
         let user = await User.findOne({ expoPushToken: token });
         
         if (!user) {
             // If user does not exist, create a new one 
             user = new User({
                 expoPushToken: token, 
-                location: {latitude, longitude}
+                location: { latitude, longitude },
+                timezone
             });
         } else {
-            // Update existing user's location and token
+            // Update existing user's location and token and timezone
             user.expoPushToken = token;
             user.location = {
                 latitude, longitude
             };
+            user.timezone = timezone;
         }
 
         // Save updated user information
         await user.save();
 
-        res.send({ message: 'Location updated successfully.' });
+        res.send({ message: 'Location and timezone updated successfully.' });
     } catch (error) {
+        console.error('Error in /update-location:', error);
         res.status(500).send({ error: 'An error occurred while updating location' });
     }
 });
@@ -52,24 +60,27 @@ router.post('/check-sun-position', async (req, res) => {
 
         // Iterate over all users and calculate the sun's position
         for (const user of users) {
-            const { latitude, longitude } = user.location;
+            const { latitude, longitude, timezone } = user.location;
             const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
             const sunAltitudeinDegrees = sunPosition.altitude * (180 / Math.PI);
 
             console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
             
             if (sunAltitudeinDegrees >= 1) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); //Start of today's date (midnight)
+                const todayInUserTimezone = DateTime.now().setZone(timezone).startOf('day');
+
+                // const today = new Date();
+                // today.setHours(0, 0, 0, 0); //Start of today's date (midnight)
 
                 // Check if a notification has been sent today
-                if (!user.lastNotificationDate || new Date(user.lastNotificationDate).getTime() < today.getTime()) {
+                if (!user.lastNotificationDate || DateTime.fromISO(user.lastNotificationDate).setZone(timezone) < todayInUserTimezone) {
+                   
                     // Send notification
                     const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                     await sendPushNotification(user.expoPushToken, message);
                    
                     // Update the last notification date
-                    user.lastNotificationDate = new Date();
+                    user.lastNotificationDate = DateTime.now().toISO(); //Save in ISO format
                     await user.save();
 
                     notificationsSent.push({
@@ -94,22 +105,24 @@ router.post('/check-sun-position', async (req, res) => {
 router.post('/send-weekly-reminder', async (req, res) => {
     try {
         const users = await User.find({});
-        const today = new Date();
-
+        // const today = new Date();
         const remindersSent = [];
 
         for (const user of users) {
-            const lastReminderDate = user.lastReminderDate ? new Date(user.lastReminderDate) : null;
+            const { timezone } = user.location;
+            const today = DateTime.now().setZone(timezone);
+
+
+            const lastReminderDate = user.lastReminderDate ? DateTime.fromISO(user.lastReminderDate).setZone(timezone) : null;
 
             // Check if it's been a week since the last reminder
-            if (!lastReminderDate || (today - lastReminderDate) >= 7 * 24 * 60 * 60 * 1000) {
+            if (!lastReminderDate || today.diff(lastReminderDate, 'days').days >= 7) {
                 const message = "Don't forget to open the app to update your location for accurate sun advice!"
-                
                 try {
                     await sendPushNotification(user.expoPushToken, message);
                     
                     // Update the last reminder date
-                    user.lastReminderDate = today;
+                    user.lastReminderDate = today.toISO();
                     await user.save();
                     
                     remindersSent.push({
