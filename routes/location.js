@@ -4,7 +4,13 @@ const User = require('../models/User');
 const SunCalc = require('suncalc');
 const sendPushNotification = require('../utils/sendPushNotification'); 
 const { DateTime } = require('luxon');
-const geoTz = require('geo-tz');
+const {find} = require('geo-tz');
+
+// Function to get the timezone from coordinates
+function getTimezoneFromCoordinates(latitude, longitude) {
+    const timezoneArray = find(latitude, longitude);  // Get timezone from geo-tz
+    return timezoneArray[0]; // Returning the first timezone (most likely)
+}
 
 // Endpoint to update location and push token
 router.post('/update-location', async (req, res) => {
@@ -20,9 +26,6 @@ router.post('/update-location', async (req, res) => {
     const { latitude, longitude } = location;
 
     try {
-        // Derive the timezone using geo-tz
-        const timezone = geoTz(latitude, longitude)[0];
-
         let user = await User.findOne({ expoPushToken: token });
         
         if (!user) {
@@ -30,7 +33,7 @@ router.post('/update-location', async (req, res) => {
             user = new User({
                 expoPushToken: token, 
                 location: { latitude, longitude },
-                timezone
+                timezone: getTimezoneFromCoordinates(latitude, longitude)
             });
         } else {
             // Update existing user's location and token and timezone
@@ -38,7 +41,7 @@ router.post('/update-location', async (req, res) => {
             user.location = {
                 latitude, longitude
             };
-            user.timezone = timezone;
+            user.timezone = getTimezoneFromCoordinates(latitude, longitude);
         }
 
         // Save updated user information
