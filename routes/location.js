@@ -72,15 +72,13 @@ router.post('/check-sun-position', async (req, res) => {
             const sunAltitudeinDegrees = sunPosition.altitude * (180 / Math.PI);
 
             console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
-            
             if (sunAltitudeinDegrees >= 1) {
                 const todayInUserTimezone = DateTime.now().setZone(timezone).startOf('day');
-
                 // const today = new Date();
                 // today.setHours(0, 0, 0, 0); //Start of today's date (midnight)
 
-                // Check if a notification has been sent today
-                if (!user.lastNotificationDate || DateTime.fromISO(user.lastNotificationDate).setZone(timezone) < todayInUserTimezone) {
+                // Check if a notification has been sent today      
+                if (!user.lastNotificationDate || user.lastNotificationDate < todayInUserTimezone) {
                    
                     // Send notification
                     const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
@@ -88,6 +86,7 @@ router.post('/check-sun-position', async (req, res) => {
                    
                     // Update the last notification date
                     user.lastNotificationDate = DateTime.now().toISO(); //Save in ISO format
+
                     await user.save();
 
                     notificationsSent.push({
