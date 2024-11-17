@@ -9,7 +9,7 @@ const {find} = require('geo-tz');
 // Function to get the timezone from coordinates
 function getTimezoneFromCoordinates(latitude, longitude) {
     const timezoneArray = find(latitude, longitude);  // Get timezone from geo-tz
-    return timezoneArray[0]; // Returning the first timezone (most likely)
+    return timezoneArray[0]; 
 }
 
 // Endpoint to update location and push token
@@ -18,12 +18,15 @@ router.post('/update-location', async (req, res) => {
 
     console.log('Received token:', token);
     console.log('Received location:', location);  // Log the location to check its structure
-
+    
     if (!token || !location) {
         return res.status(400).send({ error: 'Token and location are required' });
     }
-
+    
     const { latitude, longitude } = location;
+    const timezone = getTimezoneFromCoordinates(latitude, longitude);
+    console.log("Calculated timezone:", timezone);
+    console.log("test");
 
     try {
         let user = await User.findOne({ expoPushToken: token });
@@ -33,7 +36,7 @@ router.post('/update-location', async (req, res) => {
             user = new User({
                 expoPushToken: token, 
                 location: { latitude, longitude },
-                timezone: getTimezoneFromCoordinates(latitude, longitude)
+                timezone
             });
         } else {
             // Update existing user's location and token and timezone
@@ -41,11 +44,12 @@ router.post('/update-location', async (req, res) => {
             user.location = {
                 latitude, longitude
             };
-            user.timezone = getTimezoneFromCoordinates(latitude, longitude);
+            user.timezone = timezone;
         }
 
         // Save updated user information
         await user.save();
+        console.log('User saved:', user);
 
         res.send({ message: 'Location and timezone updated successfully.' });
     } catch (error) {
