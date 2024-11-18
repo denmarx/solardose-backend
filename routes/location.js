@@ -97,13 +97,10 @@ router.post('/check-sun-position', async (req, res) => {
             }
         }
 
-        res.status(200).send({
-            message: 'Checked sun position for all users.',
-            notificationsSent,
-        });
+        res.status(200).send('Checked sun position for all users.');
     } catch (error) {
         console.error("Error in /check-sun-position:", error);
-        res.status(500).send({ error: 'An error occured while checking the sun position' });
+        res.status(500).send('An error occured while checking the sun position');
     }
 });
 
@@ -117,7 +114,6 @@ router.post('/send-weekly-reminder', async (req, res) => {
         for (const user of users) {
             const { timezone } = user.location;
             const today = DateTime.now().setZone(timezone);
-
 
             const lastReminderDate = user.lastReminderDate ? DateTime.fromISO(user.lastReminderDate).setZone(timezone) : null;
 
@@ -141,13 +137,10 @@ router.post('/send-weekly-reminder', async (req, res) => {
             }
         }
         
-        res.status(200).send({
-            message: 'Weekly reminders sent successfully.',
-            remindersSent
-        });
+        res.status(200).send('Weekly reminders sent successfully.');
     } catch (error) {
         console.error("Error in /send-weekly-reminder:", error);
-        res.status(500).send({ error: 'An error occured while sending weekly reminders' });
+        res.status(500).send('An error occured while sending weekly reminders');
     }
 });
 
