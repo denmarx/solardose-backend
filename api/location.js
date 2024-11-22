@@ -143,6 +143,7 @@ router.post('/send-weekly-reminder', async (req, res) => {
 // Endpoint to get sun position for a specific user
 router.post('/get-sun-position', async (req, res) => {
     const { token } = req.body; // Receive the token from the client
+    
     if (!token) {
         return res.status(400).send({ error: 'Token is required' });
     }
@@ -150,6 +151,7 @@ router.post('/get-sun-position', async (req, res) => {
     try {
         // Find the user by token
         const user = await User.findOne({ expoPushToken: token });
+       
         if (!user) {
             return res.status(404).send({ error: 'User not found' });
         }
@@ -160,11 +162,10 @@ router.post('/get-sun-position', async (req, res) => {
 
         // Return sun position data to the client
         res.status(200).send({
-            sunAltitude: sunAltitudeInDegrees,
-            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 1,
             latitude,
             longitude,
-            timezone,
+            sunAltitude: sunAltitudeInDegrees,
+            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 1,
         });
     } catch (error) {
         console.error("Error in /get-sun-position:", error);
