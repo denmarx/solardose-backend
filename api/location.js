@@ -25,8 +25,6 @@ router.post('/update-location', async (req, res) => {
     
     const { latitude, longitude } = location;
     const timezone = getTimezoneFromCoordinates(latitude, longitude);
-    console.log("Calculated timezone:", timezone);
-    console.log("test");
 
     try {
         let user = await User.findOne({ expoPushToken: token });
@@ -74,8 +72,6 @@ router.post('/check-sun-position', async (req, res) => {
             console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
             if (sunAltitudeinDegrees >= 1) {
                 const todayInUserTimezone = DateTime.now().setZone(timezone).startOf('day');
-                // const today = new Date();
-                // today.setHours(0, 0, 0, 0); //Start of today's date (midnight)
 
                 // Check if a notification has been sent today      
                 if (!user.lastNotificationDate || user.lastNotificationDate < todayInUserTimezone) {
