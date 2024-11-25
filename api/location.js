@@ -45,9 +45,21 @@ router.post('/update-location', async (req, res) => {
             user.timezone = timezone;
         }
 
+        const { latitude, longitude, timezone } = user.location;
+        const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
+        const sunAltitudeInDegrees = sunPosition.altitude * (180 / Math.PI);
+
+        
         // Save updated user information
         await user.save();
         console.log('User saved:', user);
+        // Return sun position data to the client
+        res.status(200).send({
+            latitude,
+            longitude,
+            sunAltitude: sunAltitudeInDegrees,
+            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 1,
+        });
 
         res.send({ message: 'Location and timezone updated successfully.' });
     } catch (error) {
@@ -69,19 +81,41 @@ router.post('/check-sun-position', async (req, res) => {
             const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
             const sunAltitudeinDegrees = sunPosition.altitude * (180 / Math.PI);
 
+            const storedUtcTime = user.lastNotificationDate;
+            console.log("storedUtcTime", storedUtcTime);
+            
+            // Parse stored UTC time as a JavaScript Date object
+            const utcDate = new Date(storedUtcTime);
+            console.log("utcDate:", utcDate);
+            
+            const offsetMs = new Date(utcDate).getTimezoneOffset() * 60000; // Get offset in milliseconds
+            console.log("offsetMs", offsetMs);
+
+            // Adjust the time using the offset
+            const userLocalTime = new Date(utcDate.getTime() - offsetMs); // Adjust UTC time to user local time
+
+            console.log("userLocalTime", userLocalTime);
+
             console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
             if (sunAltitudeinDegrees >= 1) {
-                const todayInUserTimezone = DateTime.now().setZone(timezone).startOf('day');
+                const now = new Date();
+                const timezoneOffset = now.getTimezoneOffset(); // Offset in minutes
+                const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                todayStart.setMinutes(todayStart.getMinutes() - timezoneOffset);
+                
 
+                console.log("today In User Timezone:", todayStart);
+                console.log(userLocalTime > todayStart);
                 // Check if a notification has been sent today      
-                if (!user.lastNotificationDate || user.lastNotificationDate < todayInUserTimezone) {
+                if (!user.lastNotificationDate || userLocalTime < todayStart) {
                    
                     // Send notification
                     const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                     await sendPushNotification(user.expoPushToken, message);
                    
                     // Update the last notification date
-                    user.lastNotificationDate = DateTime.now().toISO(); //Save in ISO format
+                    user.lastNotificationDate = new Date().toISOString();
+                    console.log(user.lastNotificationDate);
 
                     await user.save();
 

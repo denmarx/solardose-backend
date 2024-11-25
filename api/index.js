@@ -21,3 +21,11 @@ app.use('/api', locationRoutes); // All routes in location.js will be prefixed w
 
 module.exports = app;
 module.exports.handler = serverless(app);
+
+// Local testing setup
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server running locally on port ${PORT}`);
+    });
+}
