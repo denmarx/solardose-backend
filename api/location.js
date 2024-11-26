@@ -44,22 +44,10 @@ router.post('/update-location', async (req, res) => {
             };
             user.timezone = timezone;
         }
-
-        const { latitude, longitude, timezone } = user.location;
-        const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
-        const sunAltitudeInDegrees = sunPosition.altitude * (180 / Math.PI);
-
-        
+      
         // Save updated user information
         await user.save();
         console.log('User saved:', user);
-        // Return sun position data to the client
-        res.status(200).send({
-            latitude,
-            longitude,
-            sunAltitude: sunAltitudeInDegrees,
-            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 1,
-        });
 
         res.send({ message: 'Location and timezone updated successfully.' });
     } catch (error) {
