@@ -78,7 +78,7 @@ router.post('/check-sun-position', async (req, res) => {
                 lastNotificationLocalTime = user.lastNotificationDate ? converUtcToLocalTime(user.lastNotificationDate, userTimeZoneOffset) : null;
             }
 
-            if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(lastNotificationLocalTime, gmtOffset)) {
+            if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(lastNotificationLocalTime, userTimeZoneOffset)) {
                 const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                 
                 await sendPushNotification(user.expoPushToken, message);
