@@ -1,6 +1,5 @@
 require('dotenv').config();
-
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const converUtcToLocalTime = (utcTime, timeZoneOffsetMinutes) => {
     const utcDate = new Date(utcTime);
