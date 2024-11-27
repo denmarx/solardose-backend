@@ -14,7 +14,7 @@ const getTimezoneFromCoordinates = async (latitude, longitude) => {
     const response = await fetch(url);
     const data = await response.json();
     console.log("data", data);
-    console.log("data:", data.formatted);
+    console.log("data:", data.gmtOffset);
     
     if (data.status === "OK") {
         return data.gmtOffset;  // Hier bekommst du die Zeitzone als string, z.B. "Europe/Berlin"
