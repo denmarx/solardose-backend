@@ -8,7 +8,7 @@ const converUtcToLocalTime = (utcTime, timeZoneOffsetMinutes) => {
 };
 
 const getTimezoneFromCoordinates = async (latitude, longitude) => {
-    const apiKey = process.env.TIMEZONE_API_KEY;
+    const apiKey = "KEN3Z36N6RQ9";
     const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&format=json&by=position&lat=${latitude}&lng=${longitude}`;
 
     const response = await fetch(url);
