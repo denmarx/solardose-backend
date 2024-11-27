@@ -16,7 +16,7 @@ const hasNotificationBeenSentToday = (lastNotificationDate, userTimeZoneOffset) 
     console.log("todayStart (UTC):", todayStartUTC.toISOString());
     const lastNotification = new Date(lastNotificationDate);
     console.log("last notification:", lastNotification);
-    console.log("is last notification later than today start?", lastNotification >= todayStart);
+    console.log("is last notification later than today start?", lastNotification >= todayStartUTC);
     return lastNotification >= todayStartUTC;
 } 
 
