@@ -2,15 +2,17 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const SunCalc = require('suncalc');
-const sendPushNotification = require('../utils/sendPushNotification'); 
 const { DateTime } = require('luxon');
-const {find} = require('geo-tz');
+const { find } = require('geo-tz');
+const sendPushNotification = require('../utils/sendPushNotification'); 
+const { converUtcToLocalTime, getTimezoneFromCoordinates} = require('../utils/timeUtils');
+const { calculateSunPosition, hasNotificationBeenSentToday} = require('../utils/sunService');
 
-// Function to get the timezone from coordinates
-function getTimezoneFromCoordinates(latitude, longitude) {
-    const timezoneArray = find(latitude, longitude);  // Get timezone from geo-tz
-    return timezoneArray[0]; 
-}
+// // Function to get the timezone from coordinates
+// function getTimezoneFromCoordinates(latitude, longitude) {
+//     const timezoneArray = find(latitude, longitude);  // Get timezone from geo-tz
+//     return timezoneArray[0]; 
+// }
 
 // Endpoint to update location and push token
 router.post('/update-location', async (req, res) => {
@@ -24,9 +26,10 @@ router.post('/update-location', async (req, res) => {
     }
     
     const { latitude, longitude } = location;
-    const timezone = getTimezoneFromCoordinates(latitude, longitude);
+    // const timezone = getTimezoneFromCoordinates(latitude, longitude);
 
     try {
+        const gmtOffset = await getTimezoneFromCoordinates(latitude, longitude)
         let user = await User.findOne({ expoPushToken: token });
         
         if (!user) {
@@ -34,7 +37,7 @@ router.post('/update-location', async (req, res) => {
             user = new User({
                 expoPushToken: token, 
                 location: { latitude, longitude },
-                timezone
+                gmtOffset
             });
         } else {
             // Update existing user's location and token and timezone
@@ -42,7 +45,7 @@ router.post('/update-location', async (req, res) => {
             user.location = {
                 latitude, longitude
             };
-            user.timezone = timezone;
+            user.gmtOffset = gmtOffset;
         }
       
         // Save updated user information
@@ -65,53 +68,30 @@ router.post('/check-sun-position', async (req, res) => {
 
         // Iterate over all users and calculate the sun's position
         for (const user of users) {
-            const { latitude, longitude, timezone } = user.location;
-            const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
-            const sunAltitudeinDegrees = sunPosition.altitude * (180 / Math.PI);
-
-            const storedUtcTime = user.lastNotificationDate;
-            console.log("storedUtcTime", storedUtcTime);
+            const { latitude, longitude } = user.location;
+            const userTimeZoneOffset = user.gmtOffset;
+            const sunAltitudeinDegrees = calculateSunPosition(latitude, longitude);
             
-            // Parse stored UTC time as a JavaScript Date object
-            const utcDate = new Date(storedUtcTime);
-            console.log("utcDate:", utcDate);
-            
-            const offsetMs = new Date(utcDate).getTimezoneOffset() * 60000; // Get offset in milliseconds
-            console.log("offsetMs", offsetMs);
+            let lastNotificationLocalTime = null;
+            if (user.lastNotificationDate) {
+                // const userTimeZoneOffset = new Date(user.lastNotificationDate).getTimezoneOffset();
+                lastNotificationLocalTime = user.lastNotificationDate ? converUtcToLocalTime(user.lastNotificationDate, userTimeZoneOffset) : null;
+                console.log("letztes Noti Datum in local:", lastNotificationLocalTime);
+            }
 
-            // Adjust the time using the offset
-            const userLocalTime = new Date(utcDate.getTime() - offsetMs); // Adjust UTC time to user local time
-
-            console.log("userLocalTime", userLocalTime);
-
-            console.log(`User: ${user.expoPushToken}, Sun Altitude: ${sunAltitudeinDegrees}°`);
-            if (sunAltitudeinDegrees >= 1) {
-                const now = new Date();
-                const timezoneOffset = now.getTimezoneOffset(); // Offset in minutes
-                const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                todayStart.setMinutes(todayStart.getMinutes() - timezoneOffset);
+            if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(lastNotificationLocalTime)) {
+                const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                 
+                await sendPushNotification(user.expoPushToken, message);
+                
+                // Update user's last notification date in UTC
+                user.lastNotificationDate = new Date().toISOString();
+                await user.save();
 
-                console.log("today In User Timezone:", todayStart);
-                console.log(userLocalTime > todayStart);
-                // Check if a notification has been sent today      
-                if (!user.lastNotificationDate || userLocalTime < todayStart) {
-                   
-                    // Send notification
-                    const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
-                    await sendPushNotification(user.expoPushToken, message);
-                   
-                    // Update the last notification date
-                    user.lastNotificationDate = new Date().toISOString();
-                    console.log(user.lastNotificationDate);
-
-                    await user.save();
-
-                    notificationsSent.push({
-                        user: user.expoPushToken,
-                        message,
-                    });
-                }
+                notificationsSent.push({
+                    user: user.expoPushToken,
+                    message,
+                });
             }
         }
 
@@ -178,7 +158,7 @@ router.post('/get-sun-position', async (req, res) => {
             return res.status(404).send({ error: 'User not found' });
         }
 
-        const { latitude, longitude, timezone } = user.location;
+        const { latitude, longitude } = user.location;
         const sunPosition = SunCalc.getPosition(new Date(), latitude, longitude);
         const sunAltitudeInDegrees = sunPosition.altitude * (180 / Math.PI);
 
