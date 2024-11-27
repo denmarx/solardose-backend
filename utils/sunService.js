@@ -10,13 +10,9 @@ const hasNotificationBeenSentToday = (lastNotificationDate, userTimeZoneOffset) 
     if (!lastNotificationDate) return false;
 
     const now = new Date();
-    console.log("now", now)
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    console.log("todayStart", todayStart)
-    todayStart.setMinutes(todayStart.getMinutes() + userTimeZoneOffset);
-    console.log("todayStart adjusted", todayStart)
+    let todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    todayStart = todayStart + userTimeZoneOffset;
     const lastNotification = new Date(lastNotificationDate);
-    console.log("lastnoti", lastNotification)
     return lastNotification >= todayStart;
 } 
 

@@ -1,9 +1,9 @@
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-const converUtcToLocalTime = (utcTime, timeZoneOffsetMinutes) => {
+const converUtcToLocalTime = (utcTime, timeZoneOffsetSeconds) => {
     const utcDate = new Date(utcTime);
-    const offsetMs = timeZoneOffsetMinutes * 60000; // Convert offset to milliseconds
+    const offsetMs = timeZoneOffsetSeconds * 1000; // Convert offset to milliseconds
     return new Date(utcDate.getTime() + offsetMs)
 };
 
@@ -13,8 +13,6 @@ const getTimezoneFromCoordinates = async (latitude, longitude) => {
 
     const response = await fetch(url);
     const data = await response.json();
-    console.log("data", data);
-    console.log("data:", data.gmtOffset);
     
     if (data.status === "OK") {
         return data.gmtOffset;  // Hier bekommst du die Zeitzone als string, z.B. "Europe/Berlin"

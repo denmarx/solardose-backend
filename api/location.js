@@ -76,7 +76,6 @@ router.post('/check-sun-position', async (req, res) => {
             if (user.lastNotificationDate) {
                 // const userTimeZoneOffset = new Date(user.lastNotificationDate).getTimezoneOffset();
                 lastNotificationLocalTime = user.lastNotificationDate ? converUtcToLocalTime(user.lastNotificationDate, userTimeZoneOffset) : null;
-                console.log("letztes Noti Datum in local:", lastNotificationLocalTime);
             }
 
             if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(lastNotificationLocalTime)) {
