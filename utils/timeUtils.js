@@ -4,7 +4,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const converUtcToLocalTime = (utcTime, timeZoneOffsetMinutes) => {
     const utcDate = new Date(utcTime);
     const offsetMs = timeZoneOffsetMinutes * 60000; // Convert offset to milliseconds
-    return new Date(utcDate.getTime() - offsetMs)
+    return new Date(utcDate.getTime() + offsetMs)
 };
 
 const getTimezoneFromCoordinates = async (latitude, longitude) => {
