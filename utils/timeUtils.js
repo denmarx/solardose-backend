@@ -6,6 +6,7 @@ const converUtcToLocalTime = (utcTime, timeZoneOffsetSeconds) => {
     console.log("timezoneoffset in sec", timeZoneOffsetSeconds);
     const offsetMs = timeZoneOffsetSeconds * 1000; // Convert offset to milliseconds
     console.log("offsetinMs", offsetMs);
+    console.log("local time:",utcDate.getTime() + offsetMs)
     return new Date(utcDate.getTime() + offsetMs)
 };
 
