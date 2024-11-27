@@ -11,7 +11,7 @@ const hasNotificationBeenSentToday = (lastNotificationDate, userTimeZoneOffset) 
 
     const now = new Date();
         let todayStart = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    todayStart.setTime(todayStart.getTime() + userTimeZoneOffset * 1000);
+    todayStart.setTime(todayStart.getTime() - userTimeZoneOffset * 1000);
        console.log("todayStart (Adjusted):", todayStart);
     console.log("todayStart (Local Time):", todayStart.toLocaleString());
     console.log("todayStart (UTC):", todayStart.toISOString());
