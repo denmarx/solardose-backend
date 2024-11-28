@@ -21,7 +21,7 @@ const hasNotificationBeenSentToday = (lastNotificationDate) => {
     console.log("todayStartTimestamp:", todayStartTimestamp);
     console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
 
-    return lastNotificationDate >= todayStartLocal;
+    return lastNotificationTimestamp >= todayStartTimestamp;
 } 
 
 
