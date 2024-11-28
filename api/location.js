@@ -30,6 +30,7 @@ router.post('/update-location', async (req, res) => {
 
     try {
         const localDate = await getLocalDateFromCoordinates(latitude, longitude)
+        console.log("localDAte:", localDate);
         let user = await User.findOne({ expoPushToken: token });
         
         if (!user) {
