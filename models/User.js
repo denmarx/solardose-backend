@@ -6,8 +6,6 @@ const userSchema = new mongoose.Schema({
         latitude: Number,
         longitude: Number,
     },
-    gmtOffset: {type: Number},
-    timezone: {type: String},
     lastNotificationDate: { type: String },
     lastReminderDate: {type: Date},
 });
