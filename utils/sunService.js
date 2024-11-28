@@ -6,13 +6,20 @@ const calculateSunPosition = (latitude, longitude) => {
     return sunAltitudeinDegrees;
 }
 
+const getStartOfDayTimestamp = (date) => {
+    const d = new Date(date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime();
+};
+
 const hasNotificationBeenSentToday = (lastNotificationDate) => {
     if (!lastNotificationDate) return false;
 
     const now = new Date();
-    const todayStartLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-    console.log("todayStart Local Time:", todayStartLocal.toLocaleString());   
-    console.log("lastNotificationDate:", lastNotificationDate);
+    const todayStartTimestamp = getStartOfDayTimestamp(now);
+    const lastNotificationTimestamp = getStartOfDayTimestamp(lastNotificationDate);
+    // const todayStartLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    console.log("todayStartTimestamp:", todayStartTimestamp);
+    console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
 
     return lastNotificationDate >= todayStartLocal;
 } 
