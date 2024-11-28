@@ -15,13 +15,12 @@ const hasNotificationBeenSentToday = (lastNotificationDate) => {
     if (!lastNotificationDate) return false;
 
     const now = new Date();
-    const todayStartTimestamp = getStartOfDayTimestamp(now);
-    const lastNotificationTimestamp = getStartOfDayTimestamp(lastNotificationDate);
     // const todayStartLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const todayStartTimestamp = getStartOfDayTimestamp(now);
     console.log("todayStartTimestamp:", todayStartTimestamp);
-    console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
+    console.log("lastNotificationTimestamp:", lastNotificationDate);
 
-    return lastNotificationTimestamp >= todayStartTimestamp;
+    return lastNotificationDate >= todayStartTimestamp;
 } 
 
 

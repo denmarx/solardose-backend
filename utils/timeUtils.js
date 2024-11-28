@@ -18,7 +18,7 @@ const getLocalDateFromCoordinates = async (latitude, longitude) => {
     const data = await response.json();
     
     if (data.status === "OK") {
-        return data.formatted;  
+        return data.timestamp;  
     } else {
         throw new Error("Zeitzone konnte nicht ermittelt werden.");
     }
