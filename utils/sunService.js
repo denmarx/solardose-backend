@@ -17,10 +17,11 @@ const hasNotificationBeenSentToday = (lastNotificationDate) => {
     const now = new Date();
     // const todayStartLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
     const todayStartTimestamp = getStartOfDayTimestamp(now);
+    const lastNotificationTimestamp = lastNotificationDate * 1000; // Convert to milliseconds
     console.log("todayStartTimestamp:", todayStartTimestamp);
-    console.log("lastNotificationTimestamp:", lastNotificationDate);
+    console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
 
-    return lastNotificationDate >= (todayStartTimestamp / 1000);
+    return lastNotificationTimestamp >= todayStartTimestamp;
 } 
 
 
