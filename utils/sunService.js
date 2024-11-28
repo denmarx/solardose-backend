@@ -20,7 +20,7 @@ const hasNotificationBeenSentToday = (lastNotificationDate) => {
     console.log("todayStartTimestamp:", todayStartTimestamp);
     console.log("lastNotificationTimestamp:", lastNotificationDate);
 
-    return lastNotificationDate >= todayStartTimestamp / 1000;
+    return lastNotificationDate >= (todayStartTimestamp / 1000);
 } 
 
 
