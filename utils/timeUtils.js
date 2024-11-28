@@ -10,7 +10,7 @@ const converUtcToLocalTime = (utcTime, timeZoneOffsetSeconds) => {
     return new Date(utcDate.getTime() + offsetMs)
 };
 
-const getTimezoneFromCoordinates = async (latitude, longitude) => {
+const getLocalDateFromCoordinates = async (latitude, longitude) => {
     const apiKey = "KEN3Z36N6RQ9";
     const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&format=json&by=position&lat=${latitude}&lng=${longitude}`;
 
@@ -18,10 +18,10 @@ const getTimezoneFromCoordinates = async (latitude, longitude) => {
     const data = await response.json();
     
     if (data.status === "OK") {
-        return data.gmtOffset;  // Hier bekommst du die Zeitzone als string, z.B. "Europe/Berlin"
+        return data.formatted;  
     } else {
         throw new Error("Zeitzone konnte nicht ermittelt werden.");
     }
 };
 
-module.exports = { converUtcToLocalTime, getTimezoneFromCoordinates };
+module.exports = { converUtcToLocalTime, getLocalDateFromCoordinates };

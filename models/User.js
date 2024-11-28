@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     },
     gmtOffset: {type: Number},
     timezone: {type: String},
-    lastNotificationDate: { type: Date },
+    lastNotificationDate: { type: String },
     lastReminderDate: {type: Date},
 });
 
