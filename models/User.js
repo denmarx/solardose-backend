@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
         longitude: { type: Number, required: true },
     },
     localDate: { type: Number, required: true },
-    timezone: { type: String, required: true},
+    timezone: { type: String, required: true },
+    nextPossibleDate: { type: Date },
     lastReminderDate: {type: Number, default: 0},
 });
 
