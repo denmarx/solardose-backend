@@ -12,9 +12,6 @@ const { calculateSunPosition, doesSunReach45Degrees} = require('../utils/sunServ
 router.post('/update-location', async (req, res) => {
     const { token, location } = req.body;
     
-    console.log('Received token:', token);
-    console.log('Received location:', location);  // Log the location to check its structure
-    
     if (!token || !location) {
         return res.status(400).send({ error: 'Token and location are required' });
     }
@@ -23,7 +20,7 @@ router.post('/update-location', async (req, res) => {
     
     try {
         const { localDate, timezone } = await getLocalDateFromCoordinates(latitude, longitude);
-        
+
         const result = doesSunReach45Degrees(latitude, longitude);
         
         let user = await User.findOne({ expoPushToken: token });
@@ -163,6 +160,30 @@ router.post('/send-weekly-reminder', async (req, res) => {
     } catch (error) {
         console.error('Error sending weekly reminders:', error);
         res.status(500).send({ error: 'An error occurred while sending the weekly reminders.' });
+    }
+});
+
+router.get('/get-sun-info', async (req, res) => {
+    const { token } = req.headers;
+
+    if (!token) {
+        return res.status(400).send({ error: 'Token is required' });
+    }
+
+    try {
+        let user = await User.findOne({ expoPushToken: token });
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        res.send({
+            nextPossibleDate: user.nextPossibleDate
+        });
+
+
+    } catch (error) {
+        console.error('Error in /get-sun-info:', error);
+        res.status(500).send({ error: 'An error occurred while retrieving sun info' });
     }
 });
 
