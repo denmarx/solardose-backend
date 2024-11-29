@@ -1,5 +1,6 @@
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const { DateTime } = require('luxon');
 
 const getLocalDateFromCoordinates = async (latitude, longitude) => {
     const apiKey = "KEN3Z36N6RQ9";
