@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    expoPushToken: String,
+    expoPushToken: {type: String, required: true},
     location: {
-        latitude: Number,
-        longitude: Number,
+        latitude: { type: Number, required: true },
+        longitude: { type: Number, required: true },
     },
-    localDate: { type: Number },
+    localDate: { type: Number, required: true },
+    timezone: { type: String, required: true},
     lastReminderDate: {type: Date},
 });
 
