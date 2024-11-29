@@ -6,12 +6,12 @@ const { DateTime } = require('luxon');
 const { find } = require('geo-tz');
 const sendPushNotification = require('../utils/sendPushNotification'); 
 const { getLocalDateFromCoordinates, hasNotificationBeenSentToday} = require('../utils/timeUtils');
-const { calculateSunPosition} = require('../utils/sunService');
+const { calculateSunPosition, doesSunReach45Degrees} = require('../utils/sunService');
 
 // Endpoint to update location and push token
 router.post('/update-location', async (req, res) => {
     const { token, location } = req.body;
-
+    
     console.log('Received token:', token);
     console.log('Received location:', location);  // Log the location to check its structure
     
@@ -20,11 +20,12 @@ router.post('/update-location', async (req, res) => {
     }
     
     const { latitude, longitude } = location;
-    // const timezone = getTimezoneFromCoordinates(latitude, longitude);
-
+    
     try {
-        const {localDate, timezone} = await getLocalDateFromCoordinates(latitude, longitude)
-
+        const { localDate, timezone } = await getLocalDateFromCoordinates(latitude, longitude);
+        
+        const result = doesSunReach45Degrees(latitude, longitude);
+        
         let user = await User.findOne({ expoPushToken: token });
         
         if (!user) {
@@ -33,7 +34,8 @@ router.post('/update-location', async (req, res) => {
                 expoPushToken: token, 
                 location: { latitude, longitude },
                 localDate,
-                timezone
+                timezone,
+                nextPossibleDate
             });
         } else {
             // Update existing user's location and token and timezone
@@ -43,6 +45,7 @@ router.post('/update-location', async (req, res) => {
             };
             user.localDate = localDate;
             user.timezone = timezone;
+            user.nextPossibleDate = result.nextPossibleDate;
         }
       
         // Save updated user information
