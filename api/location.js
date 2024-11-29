@@ -147,11 +147,9 @@ router.post('/send-weekly-reminder', async (req, res) => {
         });
 
         for (const user of usersToRemind) {
+            const message = "Don't forget to open the app to update your location for accurate sun advice!"
             // Send the push notification
-            await sendPushNotification(user.expoPushToken, {
-                title: "Weekly Reminder: Open the app for Vitamin D advice!",
-                body: "For accurate sun position and Vitamin D advice, open the app now."
-            });
+            await sendPushNotification(user.expoPushToken, message);
 
             // Update the last reminder sent timestamp
             user.lastReminderSent = now;
