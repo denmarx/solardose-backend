@@ -141,8 +141,8 @@ router.post('/send-weekly-reminder', async (req, res) => {
         // Find users who need to be reminded (no reminder sent or older than 7 days)
         const usersToRemind = await User.find({
             $or: [
-                { lastReminderSent: { $exists: false } },
-                { lastReminderSent: { $lt: now - oneWeekInMs } }
+                { lastReminderDate: { $exists: false } },
+                { lastReminderDate: { $lt: now - oneWeekInMs } }
             ]
         });
 
@@ -152,7 +152,7 @@ router.post('/send-weekly-reminder', async (req, res) => {
             await sendPushNotification(user.expoPushToken, message);
 
             // Update the last reminder sent timestamp
-            user.lastReminderSent = now;
+            user.lastReminderDate = now;
             await user.save();
         }
 
