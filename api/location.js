@@ -24,8 +24,6 @@ router.post('/update-location', async (req, res) => {
 
     try {
         const {localDate, timezone} = await getLocalDateFromCoordinates(latitude, longitude)
-        console.log("localDAte:", localDate);
-        console.log("timezone:", timezone);
 
         let user = await User.findOne({ expoPushToken: token });
         
@@ -49,7 +47,6 @@ router.post('/update-location', async (req, res) => {
       
         // Save updated user information
         await user.save();
-        console.log('User saved:', user);
 
         res.send({ message: 'Location and timezone updated successfully.' });
     } catch (error) {
@@ -96,44 +93,78 @@ router.post('/check-sun-position', async (req, res) => {
 });
 
 // Endpoint to send weekly reminders
+// router.post('/send-weekly-reminder', async (req, res) => {
+//     try {
+//         const users = await User.find({});
+//         // const today = new Date();
+//         const remindersSent = [];
+
+//         for (const user of users) {
+//             const userTimeZone = user.timezone;
+//             const today = DateTime.now().setZone(userTimeZone);
+
+//             const lastReminderDate = user.lastReminderDate ? DateTime.fromISO(user.lastReminderDate).setZone(timezone) : null;
+
+//             // Check if it's been a week since the last reminder
+//             if (!lastReminderDate || today.diff(lastReminderDate, 'days').days >= 7) {
+//                 const message = "Don't forget to open the app to update your location for accurate sun advice!"
+//                 try {
+//                     await sendPushNotification(user.expoPushToken, message);
+                    
+//                     // Update the last reminder date
+//                     user.lastReminderDate = today.toISO();
+//                     await user.save();
+                    
+//                     remindersSent.push({
+//                         user: user.expoPushToken,
+//                         message,
+//                     });
+//                 } catch (notificationError) {
+//                     console.error(`Failed to send notification to user ${user.expoPushToken}:`, notificationError);
+//                 }
+//             }
+//         }
+        
+//         res.status(200).send('Weekly reminders sent successfully.');
+//     } catch (error) {
+//         console.error("Error in /send-weekly-reminder:", error);
+//         res.status(500).send('An error occured while sending weekly reminders');
+//     }
+// });
+
+// Sample POST endpoint for sending weekly reminders
 router.post('/send-weekly-reminder', async (req, res) => {
     try {
-        const users = await User.find({});
-        // const today = new Date();
-        const remindersSent = [];
+        const now = Date.now(); // Current timestamp
+        const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
 
-        for (const user of users) {
-            const { timezone } = user.location;
-            const today = DateTime.now().setZone(timezone);
+        // Find users who need to be reminded (no reminder sent or older than 7 days)
+        const usersToRemind = await User.find({
+            $or: [
+                { lastReminderSent: { $exists: false } },
+                { lastReminderSent: { $lt: now - oneWeekInMs } }
+            ]
+        });
 
-            const lastReminderDate = user.lastReminderDate ? DateTime.fromISO(user.lastReminderDate).setZone(timezone) : null;
+        for (const user of usersToRemind) {
+            // Send the push notification
+            await sendPushNotification(user.expoPushToken, {
+                title: "Weekly Reminder: Open the app for Vitamin D advice!",
+                body: "For accurate sun position and Vitamin D advice, open the app now."
+            });
 
-            // Check if it's been a week since the last reminder
-            if (!lastReminderDate || today.diff(lastReminderDate, 'days').days >= 7) {
-                const message = "Don't forget to open the app to update your location for accurate sun advice!"
-                try {
-                    await sendPushNotification(user.expoPushToken, message);
-                    
-                    // Update the last reminder date
-                    user.lastReminderDate = today.toISO();
-                    await user.save();
-                    
-                    remindersSent.push({
-                        user: user.expoPushToken,
-                        message,
-                    });
-                } catch (notificationError) {
-                    console.error(`Failed to send notification to user ${user.expoPushToken}:`, notificationError);
-                }
-            }
+            // Update the last reminder sent timestamp
+            user.lastReminderSent = now;
+            await user.save();
         }
-        
-        res.status(200).send('Weekly reminders sent successfully.');
+
+        res.send({ message: 'Weekly reminder sent successfully.' });
     } catch (error) {
-        console.error("Error in /send-weekly-reminder:", error);
-        res.status(500).send('An error occured while sending weekly reminders');
+        console.error('Error sending weekly reminders:', error);
+        res.status(500).send({ error: 'An error occurred while sending the weekly reminders.' });
     }
 });
+
 
 // Endpoint to get sun position for a specific user
 router.post('/get-sun-position', async (req, res) => {

@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     },
     localDate: { type: Number, required: true },
     timezone: { type: String, required: true},
-    lastReminderDate: {type: Date},
+    lastReminderDate: {type: Number, default: 0},
 });
 
 module.exports = mongoose.model('User', userSchema);
