@@ -75,7 +75,7 @@ router.post('/check-sun-position', async (req, res) => {
                 await sendPushNotification(user.expoPushToken, message);
                 
                 // Update user's last notification date in UTC
-                user.lastNotificationDate = localDate;
+                user.localDate = localDate;
                 await user.save();
 
                 notificationsSent.push({
