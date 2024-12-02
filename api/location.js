@@ -66,7 +66,7 @@ router.post('/check-sun-position', async (req, res) => {
         for (const user of users) {
             const { latitude, longitude } = user.location;
             const sunAltitudeinDegrees = calculateSunPosition(latitude, longitude);
-            const localDate = user.localDate;
+            let localDate = user.localDate;
 
             const userTimeZone = user.timezone;
             
