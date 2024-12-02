@@ -66,20 +66,18 @@ router.post('/check-sun-position', async (req, res) => {
         for (const user of users) {
             const { latitude, longitude } = user.location;
             const sunAltitudeinDegrees = calculateSunPosition(latitude, longitude);
-            // const localDate = user.localDate;
+            const localDate = user.localDate;
 
             const userTimeZone = user.timezone;
-
-            const currentTimeStampInSeconds = Math.floor(DateTime.now().setZone(userTimeZone).toSeconds());
-            console.log("current Time Stamp in seconds", currentTimeStampInSeconds);
-
-            if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(currentTimeStampInSeconds, userTimeZone)) {
+            
+            if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(localDate, userTimeZone)) {
                 const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                 
                 await sendPushNotification(user.expoPushToken, message);
+                localDate = Math.floor(DateTime.now().setZone(userTimeZone).toSeconds());
                 
                 // Update user's last notification date in UTC
-                user.localDate = currentTimeStampInSeconds;
+                user.localDate = localDate;
                 await user.save();
 
                 notificationsSent.push({
