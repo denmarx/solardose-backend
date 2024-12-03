@@ -191,8 +191,8 @@ router.get('/get-sun-info', async (req, res) => {
 
 
 // Endpoint to get sun position for a specific user
-router.post('/get-sun-position', async (req, res) => {
-    const { token } = req.body; // Receive the token from the client
+router.get('/get-sun-position', async (req, res) => {
+    const { token } = req.headers; // Receive the token from the client
     
     if (!token) {
         return res.status(400).send({ error: 'Token is required' });
@@ -200,7 +200,7 @@ router.post('/get-sun-position', async (req, res) => {
 
     try {
         // Find the user by token
-        const user = await User.findOne({ expoPushToken: token });
+        let user = await User.findOne({ expoPushToken: token });
        
         if (!user) {
             return res.status(404).send({ error: 'User not found' });

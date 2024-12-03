@@ -15,7 +15,7 @@ const getLocalDateFromCoordinates = async (latitude, longitude) => {
             timezone: data.zoneName
         };  
     } else {
-        throw new Error("Unable to determine timezone or local date.");
+        throw new Error("Unable to determine timezone or local date.")
     }
 };
 
