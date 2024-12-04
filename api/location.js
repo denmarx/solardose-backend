@@ -223,6 +223,41 @@ router.get('/get-sun-position', async (req, res) => {
     }
 });
 
+router.get('/get-sun-altitude-data', async (req, res) => {
+    const { token } = req.headers;
+
+    if (!token) {
+        return res.status(400).send({ error: 'Token is required' });
+    }
+
+    try {
+        const user = await User.findOne({ expoPushToken: token });
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        const { latitude, longitude } = user.location;
+        const now = new Date();
+        const sunData = [];
+
+        // Calculate sun altitude every hour
+        for (let hour = 0; hour < 24; hour++) {
+            const time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
+            const sunPosition = SunCalc.getPosition(time, latitude, longitude);
+            sunData.push({
+                time: `${hour}:00`,
+                altitude: sunPosition.altitude * (180 / Math.PI), // Convert radians to degrees
+            });
+        }
+
+        res.status(200).send(sunData);
+    } catch (error) {
+        console.error('Error fetching sun altitude data:', error);
+        res.status(500).send({ error: 'Error fetching sun altitude data' });
+    }
+});
+
+
 
 // Endpoint to send a notification to the user
 router.post('/send-notification', async (req, res) => {

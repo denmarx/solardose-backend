@@ -34,6 +34,8 @@ const hasNotificationBeenSentToday = (lastNotificationDate, userTimeZone) => {
     const lastNotificationTimestamp = lastNotificationDate * 1000; // Convert to milliseconds
     console.log("todayStartTimestamp:", todayStartTimestamp);
     console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
+     console.log("todayStart", (new Date(todayStartTimestamp)).toLocaleString());
+    console.log("lastNotification:", (new Date(lastNotificationTimestamp)).toLocaleString());
 
     return lastNotificationTimestamp >= todayStartTimestamp;
 } 
