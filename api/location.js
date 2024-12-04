@@ -240,6 +240,16 @@ router.get('/get-sun-altitude-data', async (req, res) => {
         const now = new Date();
         const sunData = [];
 
+        // Calculate sunrise and sunset
+        const sunTimes = SunCalc.getTimes(now, latitude, longitude);
+
+          // Format sunrise and sunset times
+        const formatTime = (date) => date.toISOString().substr(11, 5); // Format as HH:mm
+
+        // Add sunrise and sunset times to the response
+        const sunriseTime = formatTime(sunTimes.sunrise);
+        const sunsetTime = formatTime(sunTimes.sunset);
+
         // Calculate sun altitude every hour
         for (let hour = 0; hour < 24; hour++) {
             const time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
@@ -250,7 +260,11 @@ router.get('/get-sun-altitude-data', async (req, res) => {
             });
         }
 
-        res.status(200).send(sunData);
+        res.status(200).send({
+            sunrise: sunriseTime,
+            sunset: sunsetTime,
+            sunAltitudes: sunData,
+        });
     } catch (error) {
         console.error('Error fetching sun altitude data:', error);
         res.status(500).send({ error: 'Error fetching sun altitude data' });
