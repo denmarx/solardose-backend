@@ -237,14 +237,19 @@ router.get('/get-sun-altitude-data', async (req, res) => {
         }
 
         const { latitude, longitude } = user.location;
+        const userTimeZone = user.timezone;
         const now = new Date();
         const sunData = [];
 
         // Calculate sunrise and sunset
         const sunTimes = SunCalc.getTimes(now, latitude, longitude);
 
-          // Format sunrise and sunset times
-        const formatTime = (date) => date.toISOString().substr(11, 5); // Format as HH:mm
+             // Use Luxon to convert UTC to local time
+        const formatTime = (date) => {
+            return DateTime.fromJSDate(date)
+                .setZone(userTimeZone)  // Convert to the local time zone of the user
+                .toFormat('HH:mm');  // Format as HH:mm
+        };
 
         // Add sunrise and sunset times to the response
         const sunriseTime = formatTime(sunTimes.sunrise);
