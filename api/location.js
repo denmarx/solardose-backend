@@ -244,7 +244,7 @@ router.get('/get-sun-altitude-data', async (req, res) => {
         // Calculate sunrise and sunset
         const sunTimes = SunCalc.getTimes(now, latitude, longitude);
 
-             // Use Luxon to convert UTC to local time
+        // Use Luxon to convert UTC to local time
         const formatTime = (date) => {
             return DateTime.fromJSDate(date)
                 .setZone(userTimeZone)  // Convert to the local time zone of the user
@@ -257,10 +257,13 @@ router.get('/get-sun-altitude-data', async (req, res) => {
 
         // Calculate sun altitude every hour
         for (let hour = 0; hour < 24; hour++) {
-            const time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
+            const timeUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
+            const localTime = DateTime.fromJSDate(timeUTC)
+                .setZone(userTimeZone)
+                .toFormat('HH:mm')
             const sunPosition = SunCalc.getPosition(time, latitude, longitude);
             sunData.push({
-                time: `${hour}:00`,
+                time: localTime,
                 altitude: sunPosition.altitude * (180 / Math.PI), // Convert radians to degrees
             });
         }
