@@ -261,7 +261,7 @@ router.get('/get-sun-altitude-data', async (req, res) => {
             const localTime = DateTime.fromJSDate(timeUTC)
                 .setZone(userTimeZone)
                 .toFormat('HH:mm')
-            const sunPosition = SunCalc.getPosition(time, latitude, longitude);
+            const sunPosition = SunCalc.getPosition(timeUTC, latitude, longitude);
             sunData.push({
                 time: localTime,
                 altitude: sunPosition.altitude * (180 / Math.PI), // Convert radians to degrees
