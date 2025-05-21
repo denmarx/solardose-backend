@@ -70,7 +70,7 @@ router.post('/check-sun-position', async (req, res) => {
 
             const userTimeZone = user.timezone;
             
-            if (sunAltitudeinDegrees >= 1 && !hasNotificationBeenSentToday(localDate, userTimeZone)) {
+            if (sunAltitudeinDegrees >= 45 && !hasNotificationBeenSentToday(localDate, userTimeZone)) {
                 const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                 
                 await sendPushNotification(user.expoPushToken, message);
