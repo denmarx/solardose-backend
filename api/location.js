@@ -165,7 +165,7 @@ router.post('/send-weekly-reminder', async (req, res) => {
     }
 });
 
-router.get('/get-sun-info', async (req, res) => {
+router.get('/get-next-possible-date', async (req, res) => {
     const { token } = req.headers;
 
     if (!token) {
@@ -215,7 +215,7 @@ router.get('/get-sun-position', async (req, res) => {
             latitude,
             longitude,
             sunAltitude: sunAltitudeInDegrees,
-            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 1,
+            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 45,
         });
     } catch (error) {
         console.error("Error in /get-sun-position:", error);
