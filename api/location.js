@@ -191,7 +191,7 @@ router.get('/get-next-possible-date', async (req, res) => {
 
 
 // Endpoint to get sun position for a specific user
-router.get('/get-sun-position', async (req, res) => {
+router.get('/get-sun-altitude', async (req, res) => {
     const { token } = req.headers; // Receive the token from the client
     
     if (!token) {
@@ -211,15 +211,10 @@ router.get('/get-sun-position', async (req, res) => {
         const sunAltitudeInDegrees = sunPosition.altitude * (180 / Math.PI);
 
         // Return sun position data to the client
-        res.status(200).send({
-            latitude,
-            longitude,
-            sunAltitude: sunAltitudeInDegrees,
-            isVitaminDSynthesisPossible: sunAltitudeInDegrees >= 45,
-        });
+        res.status(200).send({sunAltitude: sunAltitudeInDegrees,});
     } catch (error) {
-        console.error("Error in /get-sun-position:", error);
-        res.status(500).send({ error: 'Error fetching sun position' });
+        console.error("Error in /get-sun-altitude:", error);
+        res.status(500).send({ error: 'Error fetching sun altitude' });
     }
 });
 
