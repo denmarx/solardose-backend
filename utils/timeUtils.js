@@ -45,8 +45,10 @@ const hasNotificationBeenSentToday = (lastNotificationDate, userTimeZone) => {
     const now = new Date();
     const todayStartTimestamp = getStartOfDayTimestamp(now, userTimeZone);
     const lastNotificationTimestamp = lastNotificationDate * 1000; // Convert to milliseconds
+    // Zeige timestamp in ms an
     console.log("todayStartTimestamp:", todayStartTimestamp);
     console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
+    // Zeige timestamp in lesbarer Form, in UTC (Serverzeit) an (oder auch GMT)	
     console.log("todayStart", (new Date(todayStartTimestamp)).toLocaleString());
     console.log("lastNotification:", (new Date(lastNotificationTimestamp)).toLocaleString());
 

@@ -67,6 +67,7 @@ router.post('/check-sun-position', async (req, res) => {
             const { latitude, longitude } = user.location;
             const sunAltitudeinDegrees = calculateSunPosition(latitude, longitude);
             let localDate = user.localDate;
+            console.log("localDatevomServer: ", localDate);
 
             const userTimeZone = user.timezone;
             
@@ -74,7 +75,9 @@ router.post('/check-sun-position', async (req, res) => {
                 const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                 
                 await sendPushNotification(user.expoPushToken, message);
+
                 localDate = Math.floor(DateTime.now().setZone(userTimeZone).toSeconds());
+                console.log("localDate nachm Runden: ", localDate);
                 
                 // Update user's last notification date in UTC
                 user.localDate = localDate;
