@@ -6,16 +6,29 @@ const getLocalDateFromCoordinates = async (latitude, longitude) => {
     const apiKey = "KEN3Z36N6RQ9";
     const url = `http://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&format=json&by=position&lat=${latitude}&lng=${longitude}`;
 
-    const response = await fetch(url);
-    const data = await response.json();
-    
-    if (data.status === "OK") {
-        return {
-            localDate: data.timestamp,
-            timezone: data.zoneName
-        };  
-    } else {
-        throw new Error("Unable to determine timezone or local date.")
+    try { 
+        
+        const response = await fetch(url);
+        
+        const contentType = response.headers.get("content-type");
+        if (!response.ok || !contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            throw new Error(`Unexpected response from TimeZoneDB: ${response.status} ${text.slice(0, 100)}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === "OK") {
+            return {
+                localDate: data.timestamp,
+                timezone: data.zoneName
+            };  
+        } else {
+            throw new Error("API error: " + data.message);
+        }
+    } catch (err) {
+        console.error("getLocalDateFromCoordinates failed:", err.message);
+        throw err;
     }
 };
 
@@ -34,7 +47,7 @@ const hasNotificationBeenSentToday = (lastNotificationDate, userTimeZone) => {
     const lastNotificationTimestamp = lastNotificationDate * 1000; // Convert to milliseconds
     console.log("todayStartTimestamp:", todayStartTimestamp);
     console.log("lastNotificationTimestamp:", lastNotificationTimestamp);
-     console.log("todayStart", (new Date(todayStartTimestamp)).toLocaleString());
+    console.log("todayStart", (new Date(todayStartTimestamp)).toLocaleString());
     console.log("lastNotification:", (new Date(lastNotificationTimestamp)).toLocaleString());
 
     return lastNotificationTimestamp >= todayStartTimestamp;
