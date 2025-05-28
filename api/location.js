@@ -22,6 +22,7 @@ router.post('/update-location', async (req, res) => {
         const { localDate, timezone } = await getLocalDateFromCoordinates(latitude, longitude);
 
         const result = doesSunReach45Degrees(latitude, longitude);
+        const nextPossibleDate = result.nextPossibleDate;
         
         let user = await User.findOne({ expoPushToken: token });
         
