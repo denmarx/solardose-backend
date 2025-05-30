@@ -76,7 +76,7 @@ router.post('/check-sun-position', async (req, res) => {
                 await sendPushNotification(user.expoPushToken, message);
 
                 user.localDate = Math.floor(DateTime.now().setZone(userTimeZone).toSeconds());
-                console.log("localDate nachm Runden: ", localDate);
+                // console.log("localDate nachm Runden: ", localDate);
                 
                 await user.save();
 
