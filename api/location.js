@@ -19,8 +19,9 @@ router.post('/update-location', async (req, res) => {
     const { latitude, longitude } = location;
     
     try {
-        const { localDate, timezone } = await getLocalDateFromCoordinates(latitude, longitude);
-
+        // const { localDate, timezone } = await getLocalDateFromCoordinates(latitude, longitude);
+        const { timezone } = await getLocalDateFromCoordinates(latitude, longitude);
+        
         const result = doesSunReach45Degrees(latitude, longitude);
         const nextPossibleDate = result.nextPossibleDate;
         
