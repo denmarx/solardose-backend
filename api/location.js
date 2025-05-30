@@ -67,9 +67,6 @@ router.post('/check-sun-position', async (req, res) => {
         for (const user of users) {
             const { latitude, longitude } = user.location;
             const sunAltitudeinDegrees = calculateSunPosition(latitude, longitude);
-            // let localDate = user.localDate;
-            console.log("localDatevomServer: ", localDate);
-
             const userTimeZone = user.timezone;
             // 1. time using the app: localDate is by design not available, so that the if block gets triggered when user uses the app for the first time, so that a notification is sent immediately and the localDate is set to the current time in the user's timezone  
             if (sunAltitudeinDegrees >= 45 && !hasNotificationBeenSentToday(localDate, userTimeZone)) {
