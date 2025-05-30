@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
         latitude: { type: Number, required: true },
         longitude: { type: Number, required: true },
     },
-    localDate: { type: Number, required: true },
+    localDate: { type: Number, required: false, default: 0 }, // Timestamp in milliseconds
     timezone: { type: String, required: true },
     nextPossibleDate: { type: Date },
     lastReminderDate: {type: Number, default: 0},
