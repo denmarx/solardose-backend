@@ -31,7 +31,7 @@ router.post('/update-location', async (req, res) => {
             user = new User({
                 expoPushToken: token, 
                 location: { latitude, longitude },
-                localDate,
+                // localDate,
                 timezone,
                 nextPossibleDate
             });
@@ -41,7 +41,7 @@ router.post('/update-location', async (req, res) => {
             user.location = {
                 latitude, longitude
             };
-            user.localDate = localDate;
+            // user.localDate = localDate;
             user.timezone = timezone;
             user.nextPossibleDate = result.nextPossibleDate;
         }
@@ -69,16 +69,14 @@ router.post('/check-sun-position', async (req, res) => {
             const sunAltitudeinDegrees = calculateSunPosition(latitude, longitude);
             const userTimeZone = user.timezone;
             // 1. time using the app: localDate is by design not available, so that the if block gets triggered when user uses the app for the first time, so that a notification is sent immediately and the localDate is set to the current time in the user's timezone  
-            if (sunAltitudeinDegrees >= 45 && !hasNotificationBeenSentToday(localDate, userTimeZone)) {
+            if (sunAltitudeinDegrees >= 45 && !hasNotificationBeenSentToday(user.localDate, userTimeZone)) {
                 const message = "The sun is at a great angle! Perfect time for some Vitamin D!";
                 
                 await sendPushNotification(user.expoPushToken, message);
 
-                localDate = Math.floor(DateTime.now().setZone(userTimeZone).toSeconds());
+                user.localDate = Math.floor(DateTime.now().setZone(userTimeZone).toSeconds());
                 console.log("localDate nachm Runden: ", localDate);
                 
-                // Update user's last notification date 
-                user.localDate = localDate;
                 await user.save();
 
                 notificationsSent.push({
