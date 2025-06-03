@@ -233,39 +233,50 @@ router.get('/get-sun-altitude-data', async (req, res) => {
 
         const { latitude, longitude } = user.location;
         const userTimeZone = user.timezone;
-        const now = new Date();
+
+        // 6 Get "today" in user's local time
+        const nowLocal = DateTime.now().setZone(userTimeZone);
+        const todayLocal = nowLocal.startOf('day'); // Start of the day in user's local time
+
+        // Get sunrise and sunset in user's local time
+        const sunTimes = SunCalc.getTimes(todayLocal.toJSDate(), latitude, longitude);
+        
+        // Convert sunrise and sunset to Luxon DateTime in user's timezone
+        const sunrise = DateTime.fromJSDate(sunTimes.sunrise).setZone(userTimeZone);
+        const sunset = DateTime.fromJSDate(sunTimes.sunset).setZone(userTimeZone);
+        
+        // Prepare hourly sun altitude data between sunrise and sunset
         const sunData = [];
-
-        // Calculate sunrise and sunset
-        const sunTimes = SunCalc.getTimes(now, latitude, longitude);
-
-        // Use Luxon to convert UTC to local time
-        const formatTime = (date) => {
-            return DateTime.fromJSDate(date)
-                .setZone(userTimeZone)  // Convert to the local time zone of the user
-                .toFormat('HH:mm');  // Format as HH:mm
-        };
-
-        // Add sunrise and sunset times to the response
-        const sunriseTime = formatTime(sunTimes.sunrise);
-        const sunsetTime = formatTime(sunTimes.sunset);
-
-        // Calculate sun altitude every hour
-        for (let hour = 0; hour < 24; hour++) {
-            const timeUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
-            const localTime = DateTime.fromJSDate(timeUTC)
-                .setZone(userTimeZone)
-                .toFormat('HH:mm')
+        let hour = sunrise.hour;
+        while (hour <= sunset.hour) {
+            // Create a DateTime for this hour in user's local time
+            const timeLocal = todayLocal.set({ hour, minute: 0, second: 0 });
+            // Convert to JS Date in UTC for SunCalc
+            const timeUTC = timeLocal.toUTC().toJSDate();
             const sunPosition = SunCalc.getPosition(timeUTC, latitude, longitude);
             sunData.push({
-                time: localTime,
-                altitude: sunPosition.altitude * (180 / Math.PI), // Convert radians to degrees
+                time: timeLocal.toFormat('HH:mm'),
+                altitude: sunPosition.altitude * (180 / Math.PI),
             });
+            hour++;
         }
+        
+       
+        // for (let hour = 0; hour < 24; hour++) {
+        //     const timeUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour);
+        //     const localTime = DateTime.fromJSDate(timeUTC)
+        //         .setZone(userTimeZone)
+        //         .toFormat('HH:mm')
+        //     const sunPosition = SunCalc.getPosition(timeUTC, latitude, longitude);
+        //     sunData.push({
+        //         time: localTime,
+        //         altitude: sunPosition.altitude * (180 / Math.PI), // Convert radians to degrees
+        //     });
+        // }
 
         res.status(200).send({
-            sunrise: sunriseTime,
-            sunset: sunsetTime,
+            sunrise: sunrise.toFormat('HH:mm'),
+            sunset: sunset.toFormat('HH:mm'),
             sunAltitudes: sunData,
         });
     } catch (error) {
